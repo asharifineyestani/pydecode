@@ -11,35 +11,42 @@ class Commix:
         self.actions = actions
         self.return_to_original = False
 
-    @staticmethod
-    def replace_files(action, find, replace):
+    def replace_files(self, action, find, replace):
 
         if 'find_pattern' in action:
             find = action['find_pattern'].replace('?', find)
             replace = action['find_pattern'].replace('?', replace)
 
-        if 'file_path' in action:
-            if os.path.exists(action['file_path']):
-                with open(action['file_path']) as f:
-                    s = f.read()
-                s = s.replace(find, replace)
-                with open(action['file_path'], "w") as f:
-                    f.write(s)
+        if 'files' in action:
+            if self.return_to_original:
+                action['files'].reverse()
 
-        elif 'directory' in action:
-            for path, dirs, files in os.walk(os.path.abspath(action['directory'])):
-                for filename in fnmatch.filter(files, action['file_pattern']):
-                    filepath = os.path.join(path, filename)
-                    with open(filepath) as f:
-                        s = f.read()
-                    s = s.replace(find, replace)
-                    with open(filepath, "w") as f:
-                        f.write(s)
+            for filepath in action['files']:
+                self.replace_in_file(filepath, find, replace)
+
+        elif 'directories' in action:
+            if self.return_to_original:
+                action['directories'].reverse()
+
+            for directory in action['directories']:
+                for path, dirs, files in os.walk(os.path.abspath(directory['path'])):
+                    for filename in fnmatch.filter(files, directory['file_pattern']):
+                        filepath = os.path.join(path, filename)
+                        self.replace_in_file(filepath, find, replace)
         return True
 
     @staticmethod
+    def replace_in_file(filepath, find, replace):
+        if os.path.exists(filepath):
+            with open(filepath) as f:
+                s = f.read()
+            s = s.replace(find, replace)
+            with open(filepath, "w") as f:
+                f.write(s)
+
+    @staticmethod
     def rename_files(action, src, dst):
-        for path, dirs, files in os.walk(os.path.abspath(action['directory'])):
+        for path, dirs, files in os.walk(os.path.abspath(action['directory_path'])):
             old = os.path.join(path, src + action['file_type'])
             new = os.path.join(path, dst + action['file_type'])
             if os.path.exists(old):
