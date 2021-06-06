@@ -37,4 +37,13 @@ class Commix:
                         f.write(s)
         return True
 
+    @staticmethod
+    def rename_files(action, src, dst):
+        for path, dirs, files in os.walk(os.path.abspath(action['directory'])):
+            old = os.path.join(path, src + action['file_type'])
+            new = os.path.join(path, dst + action['file_type'])
+            if os.path.exists(old):
+                os.rename(old, new)
+        return True
+
 
