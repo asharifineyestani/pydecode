@@ -56,3 +56,8 @@ class Commix:
                     self.replace_files(action, find, replace)
                 elif action['type'] == 'rename':
                     self.rename_files(action, find, replace)
+
+    def encode(self):
+        self.actions.reverse()
+        self.return_to_original = True
+        return self.decode()
