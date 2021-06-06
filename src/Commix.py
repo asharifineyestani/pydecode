@@ -46,4 +46,13 @@ class Commix:
                 os.rename(old, new)
         return True
 
+    def decode(self):
+        for action in self.actions:
+            if self.return_to_original:
+                action['keywords'] = reverse_dictionary(action['keywords'])
 
+            for find, replace in action['keywords'].items():
+                if action['type'] == 'replace':
+                    self.replace_files(action, find, replace)
+                elif action['type'] == 'rename':
+                    self.rename_files(action, find, replace)
